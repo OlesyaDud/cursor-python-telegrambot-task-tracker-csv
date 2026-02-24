@@ -1,0 +1,99 @@
+You are building a Python backend project for a Telegram team task bot using aiogram v3 (async).
+Generate the COMPLETE codebase with the exact folder structure and file contents below.
+
+GOALS
+- Telegram bot for team collaboration: add tasks to a shared list.
+- Commands: /start, /add, /list, /list_csv
+- Database: SQLite using aiosqlite (async)
+- Table: tasks(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, user TEXT, created_at TEXT)
+- Logic: handle messages, add task, list tasks, export tasks to CSV and send as a Telegram document
+- Keep code simple and beginner-friendly, with comments.
+
+IMPORTANT RULES
+- Use aiogram v3 routers (Router, Dispatcher).
+- Use python-dotenv to load BOT_TOKEN from .env.
+- Use aiosqlite for DB access. Do NOT use synchronous sqlite3 calls in handlers.
+- Separate concerns into packages: handlers/, db/, keyboards/, utils/
+- main.py is the entry point and starts polling.
+- Add basic error handling and clear user messages.
+- Do NOT leave placeholders like “TODO”; produce working code.
+
+PROJECT STRUCTURE (create exactly):
+team_tasks_bot/
+  main.py
+  requirements.txt
+  .env.example
+  bot/
+    __init__.py
+    handlers/
+      __init__.py
+      start.py
+      tasks.py
+    keyboards/
+      __init__.py
+      common.py
+  db/
+    __init__.py
+    database.py
+    queries.py
+  utils/
+    __init__.py
+    csv_export.py
+
+FUNCTIONAL REQUIREMENTS
+1) /start
+   - Greets user
+   - Shows commands and an example
+   - Optionally shows a simple reply keyboard with buttons for /list and /list_csv and an example /add
+
+2) /add <task text>
+   - If no text provided, reply with usage help (example: /add Buy milk)
+   - Save task into SQLite with:
+       text = provided text
+       user = message.from_user.username if exists else message.from_user.id as string
+       created_at = current UTC time in ISO format
+   - Reply with confirmation including inserted task id
+
+3) /list
+   - Fetch all tasks ordered by id DESC
+   - If none, say “No tasks yet”
+   - Otherwise print each: #id — text (by user, created_at)
+
+4) /list_csv
+   - Fetch all tasks ordered by id DESC
+   - Convert to CSV with header: id,text,user,created_at
+   - Send as Telegram file named tasks.csv using BufferedInputFile
+   - If none, say “No tasks to export”
+
+IMPLEMENTATION DETAILS
+- requirements.txt must include: aiogram==3.*, aiosqlite==0.20.*, python-dotenv==1.*
+- .env.example must include BOT_TOKEN=PASTE_YOUR_TELEGRAM_BOT_TOKEN_HERE
+- db/database.py:
+   - DB_PATH constant (tasks.db)
+   - init_db() creates table if not exists
+   - get_db() returns a new connection
+- db/queries.py:
+   - utc_now_iso() helper
+   - add_task(text, user) -> returns inserted id
+   - list_tasks() -> list[dict] with keys id,text,user,created_at
+- utils/csv_export.py:
+   - tasks_to_csv_bytes(tasks) -> bytes (utf-8), using csv + io.StringIO
+- bot/handlers/start.py:
+   - router with /start handler
+- bot/handlers/tasks.py:
+   - router with /add, /list, /list_csv handlers
+- bot/keyboards/common.py:
+   - main_keyboard() helper using ReplyKeyboardBuilder
+- main.py:
+   - load_dotenv()
+   - read BOT_TOKEN
+   - init_db()
+   - create Bot and Dispatcher
+   - include routers
+   - start_polling
+
+OUTPUT FORMAT
+- Print each file path as a heading, then the full file contents.
+- Ensure all imports are correct and the project runs with `python main.py`.
+
+After generating the code, also include a short “How to run” section with terminal commands.
